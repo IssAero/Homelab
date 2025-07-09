@@ -1,0 +1,77 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: media-suite
+  namespace: media
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - jellyfin.example.com
+    - jellyseer.example.com
+    - prowlarr.example.com
+    - qbittorrent.example.com
+    - radarr.example.com
+    - sonarr.example.com
+    secretName: media-suite-tls
+  rules:
+  - host: jellyfin.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jellyfin
+            port:
+              number: 80
+  - host: jellyseer.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jellyseer
+            port:
+              number: 80
+  - host: qbittorrent.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: qbittorrent
+            port:
+              number: 80              
+  - host: prowlarr.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prowlarr
+            port:
+              number: 80   
+  - host: radarr.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: radarr
+            port:
+              number: 80
+  - host: sonarr.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 80            

@@ -1,0 +1,14 @@
+downloaded_iso_path
+
+packer.auto.pkrvars.hcl
+
+.terraform
+
+*.tfvars
+
+*.tfstate
+*.tfstate.backup
+
+*.lock.hcl
+
+Cloudflare-DDNS_config.json

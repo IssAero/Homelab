@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prowlarr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prowlarr
+  template:
+    metadata:
+      labels:
+        app: prowlarr
+    spec:
+      nodeSelector:
+        role: media
+      containers:
+      - name: prowlarr
+        image: linuxserver/prowlarr
+        env:
+        - name: PUID
+          value: "1056" 
+        - name: PGID
+          value: "1057" 
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        ports:
+        - containerPort: 9696
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: prowlarr

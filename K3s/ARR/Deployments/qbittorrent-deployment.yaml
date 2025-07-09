@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qbittorrent
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qbittorrent
+  template:
+    metadata:
+      labels:
+        app: qbittorrent
+    spec:
+      nodeSelector:
+        role: media
+      containers:
+      - name: qbittorrent
+        image: linuxserver/qbittorrent:5.1.0
+        resources:
+          limits:
+            memory: "2Gi"
+          requests:
+            memory: "512Mi"
+        env:
+        - name: PUID
+          value: "1056" 
+        - name: PGID
+          value: "1057"  
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: torrents
+          mountPath: /data
+        ports:
+        - containerPort: 8080
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: qbittorrent
+      - name: torrents
+        persistentVolumeClaim:
+          claimName: media-storage
+
+
+
+

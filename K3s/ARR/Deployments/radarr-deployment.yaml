@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: radarr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: radarr
+  template:
+    metadata:
+      labels:
+        app: radarr
+    spec:
+      nodeSelector:
+        role: media
+      containers:
+      - name: radarr
+        image: linuxserver/radarr
+        env:
+        - name: PUID
+          value: "1056"  
+        - name: PGID
+          value: "1057"  
+        volumeMounts:
+        - name: config
+          mountPath: /config
+        - name: media
+          mountPath: /data
+        ports:
+        - containerPort: 7878
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: radarr
+      - name: media
+        persistentVolumeClaim:
+          claimName: media-storage
