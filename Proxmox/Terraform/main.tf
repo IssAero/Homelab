@@ -1,14 +1,25 @@
+###
+#Your Packer template created the disk as scsi0, so the cloned VM expects to boot from a SCSI disk. 
+#By using virtio0 in Terraform, Proxmox didn’t see a bootable disk in the right place. 
+#Switching the Terraform disks to SCSI (scsi0) aligns it with the template, and now Proxmox can find the OS.
+
+#Users don't have passwords - VMs need to be shut down and a password must be manually set inside proxmox > cloud-init
+
+#Also I need to add the Packer code to the Repo
+
+
+
 resource "proxmox_vm_qemu" "master_node" {
   # SECTION General Settings
   count       = 1
   desc        = "Homelab Master Node"
   agent       = 1 # <-- (Optional) Enable QEMU Guest Agent
   target_node = "balo"
-  vmid        = 101 + count.index #Unique VM ID Per VM
+  vmid        = 201 + count.index #Unique VM ID Per VM
   # name        = "ubuntu-${101 + count.index}-worker-node"
   name = "Homelab-control-plane"
   # SECTION Template Settings
-  clone      = "ubuntu-server-noble"
+  clone      = "ubuntu-2404-template"
   full_clone = true
   # SECTION Boot Process
   onboot           = true
@@ -23,6 +34,8 @@ resource "proxmox_vm_qemu" "master_node" {
     sockets = 1
     type    = "host"
   }
+
+
   # SECTION Network Settings
   network {
     id     = 0 # NOTE Required since 3.x.x
@@ -31,45 +44,49 @@ resource "proxmox_vm_qemu" "master_node" {
   }
   # SECTION Disk Settings
   scsihw = "virtio-scsi-single"
+  
 
   disks {
+    
     ide {
-      ide0 {
+      ide1 {
         cloudinit {
-          storage = "local-zfs"
+          storage = "local"
         }
       }
     }
-    virtio {
-      virtio0 {
+    scsi {
+      scsi0 {
         disk {
-          storage   = "local-zfs"
+          storage   = "local"
           size      = "25G"
           iothread  = true
           replicate = false
+          
         }
       }
     }
   }
 
+  
   # SECTION Cloud Init Settings
   ipconfig0  = "ip=10.100.110.${101 + count.index}/24,gw=10.100.110.1"
   nameserver = "10.100.110.1"
-  ciuser     = "administrator"
+  ciuser     = "ubuntu"
   sshkeys    = var.PUBLIC_SSH_KEY
 }
 
-resource "proxmox_vm_qemu" "arr_worker_node" {
+resource "proxmox_vm_qemu" "media-node" {
   # SECTION General Settings
   count       = 1
   desc        = "Homelab Worker Node"
   agent       = 1 # <-- (Optional) Enable QEMU Guest Agent
   target_node = "balo"
-  vmid        = 102 + count.index #Unique VM ID Per VM
+  vmid        = 202 + count.index #Unique VM ID Per VM
   # name        = "ubuntu-${101 + count.index}-worker-node"
   name = "media-node"
   # SECTION Template Settings
-  clone      = "ubuntu-server-noble"
+  clone      = "ubuntu-2404-template"
   full_clone = true
   # SECTION Boot Process
   onboot           = true
@@ -95,16 +112,16 @@ resource "proxmox_vm_qemu" "arr_worker_node" {
 
   disks {
     ide {
-      ide0 {
+      ide1 {
         cloudinit {
-          storage = "local-zfs"
+          storage = "workhorse-pool"
         }
       }
     }
-    virtio {
-      virtio0 {
+    scsi {
+      scsi0 {
         disk {
-          storage   = "local-zfs"
+          storage   = "workhorse-pool"
           size      = "100G"
           iothread  = true
           replicate = false
@@ -116,24 +133,24 @@ resource "proxmox_vm_qemu" "arr_worker_node" {
   # SECTION Cloud Init Settings
   ipconfig0  = "ip=10.100.110.${102 + count.index}/24,gw=10.100.110.1"
   nameserver = "10.100.110.1"
-  ciuser     = "administrator"
+  ciuser     = "ubuntu"
   sshkeys    = var.PUBLIC_SSH_KEY
 }
 
 
 
 
-resource "proxmox_vm_qemu" "media_storage_worker_node" {
+resource "proxmox_vm_qemu" "cloud_node" {
   # SECTION General Settings
   count       = 1
   desc        = "Homelab Worker Node"
   agent       = 1 # <-- (Optional) Enable QEMU Guest Agent
   target_node = "balo"
-  vmid        = 103 + count.index #Unique VM ID Per VM
+  vmid        = 203 + count.index #Unique VM ID Per VM
   # name        = "ubuntu-${101 + count.index}-worker-node"
-  name = "infra-node"
+  name = "cloud-node"
   # SECTION Template Settings
-  clone      = "ubuntu-server-noble"
+  clone      = "ubuntu-2404-template"
   full_clone = true
   # SECTION Boot Process
   onboot           = true
@@ -159,16 +176,16 @@ resource "proxmox_vm_qemu" "media_storage_worker_node" {
 
   disks {
     ide {
-      ide0 {
+      ide1 {
         cloudinit {
-          storage = "local-zfs"
+          storage = "workhorse-pool"
         }
       }
     }
-    virtio {
-      virtio0 {
+    scsi {
+      scsi0 {
         disk {
-          storage   = "local-zfs"
+          storage   = "workhorse-pool"
           size      = "100G"
           iothread  = true
           replicate = false
@@ -180,7 +197,7 @@ resource "proxmox_vm_qemu" "media_storage_worker_node" {
   # SECTION Cloud Init Settings
   ipconfig0  = "ip=10.100.110.${103 + count.index}/24,gw=10.100.110.1"
   nameserver = "10.100.110.1"
-  ciuser     = "administrator"
+  ciuser     = "ubuntu"
   sshkeys    = var.PUBLIC_SSH_KEY
 }
 
@@ -192,11 +209,11 @@ resource "proxmox_vm_qemu" "networking_node" {
   desc        = "Homelab Networking Worker Node"
   agent       = 1 # <-- (Optional) Enable QEMU Guest Agent
   target_node = "balo"
-  vmid        = 104 + count.index #Unique VM ID Per VM
+  vmid        = 204 + count.index #Unique VM ID Per VM
   # name        = "ubuntu-${101 + count.index}-worker-node"
   name = "monitoring-node"
   # SECTION Template Settings
-  clone      = "ubuntu-server-noble"
+  clone      = "ubuntu-2404-template"
   full_clone = true
   # SECTION Boot Process
   onboot           = true
@@ -222,17 +239,17 @@ resource "proxmox_vm_qemu" "networking_node" {
 
   disks {
     ide {
-      ide0 {
+      ide1 {
         cloudinit {
-          storage = "local-zfs"
+          storage = "workhorse-pool"
         }
       }
     }
-    virtio {
-      virtio0 {
+    scsi {
+      scsi0 {
         disk {
-          storage   = "local-zfs"
-          size      = "100G"
+          storage   = "workhorse-pool"
+          size      = "50G"
           iothread  = true
           replicate = false
         }
@@ -243,6 +260,6 @@ resource "proxmox_vm_qemu" "networking_node" {
   # SECTION Cloud Init Settings
   ipconfig0  = "ip=10.100.110.${104 + count.index}/24,gw=10.100.110.1"
   nameserver = "10.100.110.1"
-  ciuser     = "administrator"
+  ciuser     = "ubuntu"
   sshkeys    = var.PUBLIC_SSH_KEY
 }
