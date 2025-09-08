@@ -15,13 +15,13 @@ packer {
 variable "proxmox_url" {
   type        = string
   description = "The Proxmox API URL"
-  default     = "https://192.168.1.95:8006/api2/json"
+  default     = "https://10.100.110.20:8006/api2/json"
 }
 
 variable "proxmox_username" {
   type        = string
   description = "The Proxmox username for API operations"
-  default     = "root@pam!terraform"
+  default     = "packer@pve!packer-admin-token"
 }
 
 variable "proxmox_token" {
@@ -33,7 +33,7 @@ variable "proxmox_token" {
 variable "proxmox_node" {
   type        = string
   description = "The Proxmox node to build on"
-  default     = "proxmox"
+  default     = "balo"
 }
 
 # VM Identification
@@ -47,7 +47,7 @@ variable "vm_id" {
 variable "iso_file" {
   type        = string
   description = "The ISO file to use for installation"
-  default     = "local:iso/ubuntu-24.04.2-live-server-amd64.iso"
+  default     = "local:iso/ubuntu-24.04.1-live-server-amd64.iso"
 }
 
 variable "iso_checksum" {
@@ -93,7 +93,7 @@ source "proxmox-iso" "ubuntu-2404" {
   # VM General Settings
   vm_id                = var.vm_id
   vm_name              = "ubuntu-2404-template"
-  template_description = "Ubuntu 24.04 Server Template, built with Packer on ${local.buildtime}"
+  template_description = "Ubuntu 24.04.1 Server Template, built with Packer on ${local.buildtime}"
 
   # VM ISO Settings
 
@@ -106,7 +106,7 @@ source "proxmox-iso" "ubuntu-2404" {
   }
 
   # Explicitly set boot order to prefer scsi0 (installed disk) over ide devices
-  boot = "order=scsi0;net0;ide0"
+  boot = "order=ide0;scsi0;net0"
 
   # VM System Settings
   qemu_agent = true
@@ -117,9 +117,9 @@ source "proxmox-iso" "ubuntu-2404" {
   scsi_controller = "virtio-scsi-single"
 
   disks {
-    disk_size    = "20G"
+    disk_size    = "50G"
     format       = "raw"
-    storage_pool = "local-lvm"
+    storage_pool = "local"
     type         = "scsi"
     ssd          = true
   }
@@ -133,7 +133,7 @@ source "proxmox-iso" "ubuntu-2404" {
 
   # VM Cloud-Init Settings
   cloud_init              = true
-  cloud_init_storage_pool = "local-lvm"
+  cloud_init_storage_pool = "local"
 
   # Cloud-init config via additional ISO
   additional_iso_files {
@@ -185,43 +185,6 @@ build {
       "sudo rm -f /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg",
       "sudo rm -f /etc/netplan/00-installer-config.yaml",
       "echo 'Ubuntu 24.04 Template by Packer - Creation Date: $(date)' | sudo tee /etc/issue"
-    ]
-  }
-
-  # Install Docker
-  provisioner "shell" {
-    inline = [
-      "echo 'Installing Docker...'",
-      "# Add Docker's official GPG key",
-      "sudo apt-get update",
-      "sudo apt-get install -y ca-certificates curl gnupg",
-      "sudo install -m 0755 -d /etc/apt/keyrings",
-      "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
-      "sudo chmod a+r /etc/apt/keyrings/docker.gpg",
-
-      "# Add the Docker repository",
-      "echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo \"$VERSION_CODENAME\") stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-
-      "# Pin Docker version",
-      "echo 'Package: docker-ce' | sudo tee /etc/apt/preferences.d/docker-ce",
-      "echo 'Pin: version 5:27.5.1*' | sudo tee -a /etc/apt/preferences.d/docker-ce",
-      "echo 'Pin-Priority: 999' | sudo tee -a /etc/apt/preferences.d/docker-ce",
-
-      "# Install Docker",
-      "sudo apt-get update",
-      "sudo apt-get install -y docker-ce=5:27.5.1* docker-ce-cli=5:27.5.1* containerd.io docker-buildx-plugin docker-compose-plugin",
-
-      "# Add ubuntu user to docker group",
-      "sudo usermod -aG docker ubuntu",
-
-      "# Enable Docker service",
-      "sudo systemctl enable docker",
-
-      "# Verify installation",
-      "docker --version",
-      "docker compose version",
-
-      "echo 'Docker installation complete!'"
     ]
   }
 

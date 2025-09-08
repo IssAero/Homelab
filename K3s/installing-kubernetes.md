@@ -20,10 +20,10 @@ sudo systemctl status k3s
 4. install K3s on additional nodes:
 ```
 ⚠️ Get the SERVER_IP and NODE_TOKEN (run this on the control node) ⚠️
-
 ip a | grep inet
 sudo cat /var/lib/rancher/k3s/server/node-token
 
+Run this on the worker node:
 curl -sfL https://get.k3s.io | K3S_URL=https://<SERVER_IP>:6443 K3S_TOKEN=<NODE_TOKEN> sh -
 ```
 5. Verify the nodes are connected and running:

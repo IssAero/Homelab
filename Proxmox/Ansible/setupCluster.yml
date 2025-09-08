@@ -1,0 +1,64 @@
+- name: Configure Kubernetes cluster
+  hosts: control-node
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Install dependencies for Helm
+      ansible.builtin.apt:
+        name: [wget, tar]
+        state: present
+        update_cache: yes
+
+    - name: Download Helm
+      ansible.builtin.get_url:
+        url: https://get.helm.sh/helm-v3.18.3-linux-amd64.tar.gz
+        dest: /tmp/helm.tar.gz
+        mode: '0644'
+
+    - name: Extract Helm
+      ansible.builtin.unarchive:
+        src: /tmp/helm.tar.gz
+        dest: /tmp
+        remote_src: yes
+
+    - name: Move Helm binary
+      ansible.builtin.command: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+      args:
+        creates: /usr/local/bin/helm
+      become: yes
+
+    - name: Install Calico CNI
+      ansible.builtin.shell: kubectl --kubeconfig=/home/ubuntu/.kube/config apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.30.3/manifests/calico.yaml
+      register: calico_result
+      changed_when: "'created' in calico_result.stdout or 'configured' in calico_result.stdout"
+
+    - name: Label worker nodes
+      ansible.builtin.shell: kubectl --kubeconfig=/home/ubuntu/.kube/config label node {{ item.name }} role={{ item.role }} --overwrite
+      loop:
+        - { name: "media-node", role: "media" }
+        - { name: "cloud-node", role: "cloud" }
+        - { name: "network-node", role: "network" }
+      ignore_errors: yes
+
+    - name: Install ingress-nginx
+      ansible.builtin.shell: |
+        helm --kubeconfig=/home/ubuntu/.kube/config upgrade --install ingress-nginx ingress-nginx \
+        --repo https://kubernetes.github.io/ingress-nginx \
+        --namespace ingress-nginx --create-namespace \
+        --set controller.nodeSelector."kubernetes\.io/hostname"=network-node
+
+    - name: Install Longhorn
+      ansible.builtin.shell: kubectl --kubeconfig=/home/ubuntu/.kube/config apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.8.1/deploy/longhorn.yaml
+
+    - name: Enable kubectl autocompletion for ubuntu
+      ansible.builtin.shell: |
+        echo 'source <(kubectl --kubeconfig=/home/ubuntu/.kube/config completion bash)' >> /home/ubuntu/.bashrc
+      args:
+        executable: /bin/bash
+      become: yes
+      become_user: ubuntu
+
+
+      #Separate VM reboot is necessary after setting up the cluster, or Calico will still show independent pods as Running 0/1
+      #Right now, Ubuntu 24.4.1 is the only version that works with Calico 3.30.3 - newer versions will throw kernel mismatch with ipset.

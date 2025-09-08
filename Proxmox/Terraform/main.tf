@@ -42,38 +42,33 @@ resource "proxmox_vm_qemu" "master_node" {
     bridge = "vmbr0"
     model  = "virtio"
   }
-  # SECTION Disk Settings
+# SECTION Disk Settings
   scsihw = "virtio-scsi-single"
-  
-
   disks {
-    
     ide {
       ide1 {
         cloudinit {
-          storage = "local"
+          storage = "workhorse-pool"
         }
       }
     }
     scsi {
       scsi0 {
         disk {
-          storage   = "local"
-          size      = "25G"
+          storage   = "workhorse-pool"
+          size      = "100G"
           iothread  = true
           replicate = false
-          
         }
       }
     }
   }
-
-  
   # SECTION Cloud Init Settings
   ipconfig0  = "ip=10.100.110.${101 + count.index}/24,gw=10.100.110.1"
   nameserver = "10.100.110.1"
   ciuser     = "ubuntu"
   sshkeys    = var.PUBLIC_SSH_KEY
+
 }
 
 resource "proxmox_vm_qemu" "media-node" {
@@ -211,7 +206,7 @@ resource "proxmox_vm_qemu" "networking_node" {
   target_node = "balo"
   vmid        = 204 + count.index #Unique VM ID Per VM
   # name        = "ubuntu-${101 + count.index}-worker-node"
-  name = "monitoring-node"
+  name = "network-node"
   # SECTION Template Settings
   clone      = "ubuntu-2404-template"
   full_clone = true
@@ -263,3 +258,4 @@ resource "proxmox_vm_qemu" "networking_node" {
   ciuser     = "ubuntu"
   sshkeys    = var.PUBLIC_SSH_KEY
 }
+
