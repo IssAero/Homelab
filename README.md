@@ -2,6 +2,14 @@
 
 # ☸️ Kubernetes Homelab ☸️
 
+### New revision - due to HDD failure:
+
+Due to a recent HDD failure (to be investigated) I've been forced to make some changes to the Homelab - The most important being Automating the Cluster Creating/Joining/Setup with Ansible, a technology I've really wanted to start using. 
+I've also changed the CNI from Calico to Cillium, due to too much headache with the ipset version that was being delivered with Calico and the mismatch it had with the current LTS version of Ubuntu. 
+TLDR: Cillium simply works.
+
+Also for future reference, the next change I'm looking to do is to switch from Ubuntu to RHEL, as I'm not a very big fan of Canonical, and it has caused some issues in the redeployment of the server this time.
+
 ## 📑 Intro / Why build a homelab with Kubernetes?
 
 I felt that as someone trying to break into the DevOps market, my choices were pretty limited and I felt stuck at times: My job wasn't too technical and I wanted to learn more technologies, so I applied to more technical positions. They end up choosing someone with more experience. So I'm back at square one. This probably sounds familiar, so I decided I'd get the experience needed on my own.
@@ -47,3 +55,4 @@ This took a long time as well in order to tinker and optimise every app config -
 Initially I've set up a DDNS pod in order to have my apps reachable from my domain, however, I've soon found out that my ISP moved me under a CGNAT, breaking that setup. I've found a workaround in using a Cloudflared tunnel, which so far seems to be working fine.
 
 Another issue I've had was hardlinking the files that qbittorrent was downloading to the library of the Sonarr/Radarr, as this was causing my media library to take up twice the space, due to copying the downloaded files instead of hardlinking them - turns out this issue was caused by having multiple PVs/PVCs for the same NFS directory - this was causing my pods to think that they are separate file systems - The fix was simple, have only one PV/PVC for the parent directory, in my case **/data**.
+
