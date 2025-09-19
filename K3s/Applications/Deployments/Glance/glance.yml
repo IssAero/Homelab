@@ -1,0 +1,115 @@
+auth:
+  secret-key: example # this must be set to a random value generated using the secret:make CLI command
+  users:
+    admin-glance:
+      password: example # Change this
+
+theme:
+  background-color: 0 0 16
+  contrast-multiplier: 1.2
+  primary-color: 0 0 100
+  positive-color: 135 94 66
+  negative-color: 0 100 67
+
+pages:
+  - name: Home
+    # Optionally, if you only have a single page you can hide the desktop navigation for a cleaner look
+    # hide-desktop-navigation: true
+    columns:
+      - size: small
+        widgets:
+          - type: calendar
+            first-day-of-week: monday
+
+          - type: to-do
+
+          - type: group
+            widgets:
+              - type: reddit
+                subreddit: selfhosted
+                show-thumbnails: true
+              - type: reddit
+                subreddit: devops
+                show-thumbnails: true
+
+      - size: full
+        widgets:
+
+          - type: group
+            widgets:
+
+              - type: monitor
+                cache: 1m
+                title: Services
+                sites:
+                  - title: Jellyfin
+                    url: https://jellyfin.balo-retea.org
+                    icon: sh:jellyfin
+                  - title: Jellyseerr
+                    url: https://jellyseer.balo-retea.org
+                    icon: sh:jellyseerr
+                  - title: Prowlarr
+                    url: https://prowlarr.balo-retea.org
+                    icon: sh:prowlarr
+                  - title: Radarr
+                    url: https://radarr.balo-retea.org
+                    icon: sh:radarr
+                  - title: Sonarr
+                    url: https://sonarr.balo-retea.org
+                    icon: sh:sonarr
+                  - title: Qbittorrent
+                    url: https://qbittorrent.balo-retea.org
+                    icon: sh:qbittorrent
+
+          - type: videos
+            channels:
+              - UC9x0AN7BWHpCDHSm9NiJFJQ # NetworkChuck
+              - UCXuqSBlHAE6Xw-yeJA0Tunw # Linus Tech Tips
+              - UCR-DXc1voovS8nhAvccRZhg # Jeff Geerling
+              - UCsBjURrPoezykLs9EqgamOA # Fireship
+              - UCBJycsmduvYEL83R_U4JriQ # Marques Brownlee
+              - UCHnyfMqiRRG1u-2MsSQLbXA # Veritasium
+
+
+
+          - type: rss
+            limit: 10
+            style: detailed-list
+            collapse-after: 3
+            cache: 1h
+            feeds:
+              - url: https://www.biziday.ro/feed/
+                title: biziday
+
+      - size: small
+        widgets:
+          - type: weather
+            location: Bucharest, Romania
+            units: metric # alternatively "imperial"
+            hour-format: 24h # alternatively "24h"
+            # Optionally hide the location from being displayed in the widget
+            # hide-location: true
+
+          - type: markets
+            markets:
+              - symbol: SPY
+                name: S&P 500
+              - symbol: NVDA
+                name: Nvidia
+              - symbol: AMZN
+                name: Amazon
+              - symbol: ORCL
+                name: Oracle
+              - symbol: AMD
+                name: AMD
+
+          - type: releases
+            cache: 1d
+            # Without authentication the Github API allows for up to 60 requests per hour. You can create a
+            # read-only token from your Github account settings and use it here to increase the limit.
+            # token: ...
+            repositories:
+              - glanceapp/glance
+              - jellyfin/jellyfin
+              - immich-app/immich
+

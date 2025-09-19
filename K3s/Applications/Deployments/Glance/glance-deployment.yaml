@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glance
+  namespace: glance
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: glance
+  template:
+    metadata:
+      labels:
+        app: glance
+    spec:
+      nodeSelector:
+        role: network
+      containers:
+      - name: glance
+        image: glanceapp/glance
+        env:
+        - name: PUID
+          value: "1056"
+        - name: PGID
+          value: "1057"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+        ports:
+        - containerPort: 8080
+      volumes:
+      - name: config
+        persistentVolumeClaim:
+          claimName: glance
+
+#kubectl cp glance.yml -n glance glance-6f8bcfcbf9-rxfz7:/app/config/glance.yml

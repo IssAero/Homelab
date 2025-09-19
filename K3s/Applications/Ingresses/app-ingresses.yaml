@@ -7,15 +7,15 @@ spec:
   ingressClassName: nginx
   tls:
   - hosts:
-    - jellyfin.example.com
-    - jellyseer.example.com
-    - prowlarr.example.com
-    - qbittorrent.example.com
-    - radarr.example.com
-    - sonarr.example.com
+    - jellyfin.example.org
+    - jellyseer.example.org
+    - prowlarr.example.org
+    - qbittorrent.example.org
+    - radarr.example.org
+    - sonarr.example.org
     secretName: media-suite-tls
   rules:
-  - host: jellyfin.example.com
+  - host: jellyfin.example.org
     http:
       paths:
       - path: /
@@ -25,7 +25,7 @@ spec:
             name: jellyfin
             port:
               number: 80
-  - host: jellyseer.example.com
+  - host: jellyseer.example.org
     http:
       paths:
       - path: /
@@ -35,7 +35,7 @@ spec:
             name: jellyseer
             port:
               number: 80
-  - host: qbittorrent.example.com
+  - host: qbittorrent.example.org
     http:
       paths:
       - path: /
@@ -45,7 +45,7 @@ spec:
             name: qbittorrent
             port:
               number: 80              
-  - host: prowlarr.example.com
+  - host: prowlarr.example.org
     http:
       paths:
       - path: /
@@ -55,7 +55,7 @@ spec:
             name: prowlarr
             port:
               number: 80   
-  - host: radarr.example.com
+  - host: radarr.example.org
     http:
       paths:
       - path: /
@@ -65,7 +65,7 @@ spec:
             name: radarr
             port:
               number: 80
-  - host: sonarr.example.com
+  - host: sonarr.example.org
     http:
       paths:
       - path: /
@@ -74,4 +74,34 @@ spec:
           service:
             name: sonarr
             port:
-              number: 80            
+              number: 80
+  - host: immich.example.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 80     
+  - host: cloud.example.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 80
+  - host: homepage.example.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: sonarr
+            port:
+              number: 80
