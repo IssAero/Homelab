@@ -15,9 +15,18 @@ spec:
     spec:
       nodeSelector:
         role: media
+      securityContext:   
+        supplementalGroups:      
+          - 993
+          - 44
       containers:
       - name: jellyfin
-        image: jellyfin/jellyfin
+        image: jellyfin/jellyfin:latest
+        env:
+        - name: PUID
+          value: "1056" 
+        - name: PGID
+          value: "1057"
         volumeMounts:
         - name: config
           mountPath: /config

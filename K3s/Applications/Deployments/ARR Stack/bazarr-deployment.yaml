@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bazarr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bazarr
+  template:
+    metadata:
+      labels:
+        app: bazarr
+    spec:
+      nodeSelector:
+        role: media
+      containers:
+      - name: bazarr
+        image: linuxserver/bazarr
+        env:
+        - name: PUID
+          value: "1056" 
+        - name: PGID
+          value: "1057" 
+        volumeMounts:
+          - name: config
+            mountPath: /config
+          - name: media
+            mountPath: /data
+        ports:
+        - containerPort: 6767
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: bazarr
+        - name: media
+          persistentVolumeClaim:
+            claimName: media-storage

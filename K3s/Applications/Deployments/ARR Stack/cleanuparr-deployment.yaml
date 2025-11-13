@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cleanuparr
+  namespace: media
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cleanuparr
+  template:
+    metadata:
+      labels:
+        app: cleanuparr
+    spec:
+      nodeSelector:
+        role: media
+      containers:
+      - name: cleanuparr
+        image: ghcr.io/cleanuparr/cleanuparr:latest
+        env:
+        - name: PUID
+          value: "1056" 
+        - name: PGID
+          value: "1057" 
+        volumeMounts:
+          - name: config
+            mountPath: /config
+        ports:
+        - containerPort: 11011
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: cleanuparr

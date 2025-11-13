@@ -1,10 +1,21 @@
 ### ⚒️ work in progress.
 
-# ☸️ Kubernetes Homelab ☸️
+# 🛞 Kubernetes Homelab 🐋
 
-### New revision - due to HDD failure:
+## What is the cluster currently running (These are prone to changing - just what I'm using atm):
 
-Due to a recent HDD failure (to be investigated) I've been forced to make some changes to the Homelab - The most important being Automating the Cluster Creating/Joining/Setup with Ansible, a technology I've really wanted to start using. 
+### Media Stack
+For as close as possible to a Netflix experience, I'm currently running [Jellyfin](https://jellyfin.org/), [Jellyseer](https://github.com/seerr-team/seerr), [Qbittorrent](https://www.qbittorrent.org/), [Prowlarr](https://prowlarr.com/), [Radarr](https://radarr.video/), [Sonarr](https://sonarr.tv/), [Bazarr](https://www.bazarr.media/), [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr).
+
+### Cloud Stack
+For hosting my photos and decongesting my phone, I'm using [Immich](https://immich.app/). For my files, after a couple of experiments I've ended up with [OwnCloud](https://owncloud.com/).
+
+### Monitoring Stack
+In order to diagnose issues and monitor, I've deployed [Prometheus](https://prometheus.io/), [Loki](https://grafana.com/oss/loki/), [Alloy](https://grafana.com/docs/alloy/latest/) and obviously [Grafana](https://grafana.com/).
+
+## New changes:
+
+After the initial post, I've made some changes to the Homelab - The most important being Automating the Cluster Creating/Joining/Setup with Ansible, a technology I've really wanted to start using. 
 I've also changed the CNI from Calico to Cillium, due to too much headache with the ipset version that was being delivered with Calico and the mismatch it had with the current LTS version of Ubuntu. 
 TLDR: Cillium simply works.
 
@@ -16,10 +27,7 @@ I felt that as someone trying to break into the DevOps market, my choices were p
 
 Having played around with a homelab before, only running containers on it, I took a CKAD course and decided that this would be a great project to get hands on experience.
 
-And so the lab was built using [Packer](https://developer.hashicorp.com/packer), [Terraform](https://developer.hashicorp.com/terraform), [Proxmox VE](https://www.proxmox.com/en/), [K3s](https://k3s.io/) and a lot of yaml 📄
-
-I've taken inspiration from https://merox.dev/blog/kubernetes-media-server/ , but I felt that I could improve on some points a bit and develop them more.
-
+And so the lab was built using [Packer](https://developer.hashicorp.com/packer), [Terraform](https://developer.hashicorp.com/terraform), [Proxmox VE](https://www.proxmox.com/en/), [K3s](https://k3s.io/) ...and a lot of yaml📄
 
 ## 🖥️ Part I - Proxmox / Packer / Terraform
 
@@ -48,11 +56,24 @@ I wanted to disable the default network plugin, which was Flannel, due to it bei
 
 The reason for disabling Traefik and Flannel are mainly because there is not as much support for those as there is for Calico (CNI) and NGINX Ingress - both of which are the alternatives I've chosen to install on my cluster.
 
-## 🍿 Part III - The ARR Stack 
+## 🍿 Part III - Deploying the applications
+### (Not final, mainly a place holder for when I'll get the time to write in more detail)
 
+### The Media Stack
 This took a long time as well in order to tinker and optimise every app config - I won't go into too much detail here, everyone can follow the guides over at https://trash-guides.info/ , however I'll talk a bit about the issues I ran into while trying to set everything up.
 
 Initially I've set up a DDNS pod in order to have my apps reachable from my domain, however, I've soon found out that my ISP moved me under a CGNAT, breaking that setup. I've found a workaround in using a Cloudflared tunnel, which so far seems to be working fine.
 
 Another issue I've had was hardlinking the files that qbittorrent was downloading to the library of the Sonarr/Radarr, as this was causing my media library to take up twice the space, due to copying the downloaded files instead of hardlinking them - turns out this issue was caused by having multiple PVs/PVCs for the same NFS directory - this was causing my pods to think that they are separate file systems - The fix was simple, have only one PV/PVC for the parent directory, in my case **/data**.
 
+### Cloud Stack
+This one was quite straight forward, after the stable release of Immich, everything was documented nicely and tidy like. Main issue with Immich had to be the removal of redis and postgre from the helm chart, and requiring to deploy separate instances which we'll later link together.
+
+Owncloud was similar, with mariadb not being included and the helm chart not even being released and requiring manual download and packaging into a helm package. After some tinkering with the value.yaml file, I've gotten to the point where I could deploy and link both of these. 
+
+One issue I've had was with the mariadb instance, I couldn't get the database and user to get created on deployment and it required some manual intervention.
+
+Another being the helm chart's weird behaviour where it wouldn't accept a secret as a database username, no matter how I tried, I couldn't get it to work - it needed plain text as it was saving it as a secret after deploying the helm chart.
+
+### Monitoring Stack
+Nothing to add here, the helm chart was pretty straight forward, I've pointed them using nodeSelector to the monitoring-node and it was a simple 'helm install ...' to the finish line. Only issues I've had was with providing Alloy the right set of instructions in order to start pulling logs from pods and namespaces - check the alloy-values.yaml for my setup.

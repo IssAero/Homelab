@@ -9,10 +9,12 @@ spec:
     name: letsencrypt-cloudflare   # Your ClusterIssuer name
     kind: ClusterIssuer
   dnsNames:
-    - jellyfin.example.com
-    - jellyseer.example.com
-    - qbittorrent.example.com
-    - prowlarr.example.com
-    - radarr.example.com
-    - sonarr.example.com
-    - immich.example.com
+    - jellyfin.example.org
+    - jellyseer.example.org
+    - qbittorrent.example.org
+    - prowlarr.example.org
+    - radarr.example.org
+    - sonarr.example.org
+    - immich.example.org
+    - homepage.example.org
+    - cloud.example.org

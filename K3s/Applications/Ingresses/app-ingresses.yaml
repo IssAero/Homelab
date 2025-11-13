@@ -13,6 +13,8 @@ spec:
     - qbittorrent.example.org
     - radarr.example.org
     - sonarr.example.org
+    - bazarr.example.org
+    
     secretName: media-suite-tls
   rules:
   - host: jellyfin.example.org
@@ -103,5 +105,15 @@ spec:
         backend:
           service:
             name: sonarr
+            port:
+              number: 80
+  - host: bazarr.example.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: bazarr
             port:
               number: 80

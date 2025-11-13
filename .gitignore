@@ -12,3 +12,7 @@ packer.auto.pkrvars.hcl
 *.lock.hcl
 
 Cloudflare-DDNS_config.json
+
+immich-secret.yaml
+
+*-config.xml

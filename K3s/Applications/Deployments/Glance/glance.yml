@@ -1,8 +1,8 @@
 auth:
-  secret-key: example # this must be set to a random value generated using the secret:make CLI command
+  secret-key: cLnXPl00UvO1Z8QO1sa7LCHL52i48twt7wdLcKExOFmU8ckFFhPJPpxK8qCrnov7BLytiHMqkmorKP4D0vWw+A== # this must be set to a random value generated using the secret:make CLI command
   users:
     admin-glance:
-      password: example # Change this
+      password: VreauSaVadData2025
 
 theme:
   background-color: 0 0 16
@@ -54,12 +54,28 @@ pages:
                   - title: Radarr
                     url: https://radarr.balo-retea.org
                     icon: sh:radarr
+                  - title: Bazarr
+                    url: https://bazarr.balo-retea.org
+                    icon: sh:bazarr
                   - title: Sonarr
                     url: https://sonarr.balo-retea.org
                     icon: sh:sonarr
+                  - title: Cleanuparr
+                    url: https://cleanuparr.balo-retea.org
+                    icon: sh:cleanuparr.png
                   - title: Qbittorrent
                     url: https://qbittorrent.balo-retea.org
                     icon: sh:qbittorrent
+                  - title: Grafana 
+                    url: https://grafana.balo-retea.org
+                    icon: sh:grafana
+                  - title: Owncloud
+                    url: https://owncloud.balo-retea.org
+                    icon: sh:owncloud
+                  - title: Immich
+                    url: https://immich.balo-retea.org
+                    icon: sh:immich
+
 
           - type: videos
             channels:
@@ -102,6 +118,8 @@ pages:
                 name: Oracle
               - symbol: AMD
                 name: AMD
+              - symbol: SAAB-B.ST
+                name: SAAB
 
           - type: releases
             cache: 1d
